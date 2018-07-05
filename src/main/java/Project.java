@@ -22,30 +22,26 @@ public class Project {
         packages.add(aPackage);
     }
 
-    private List<Package> packagesList;
-
     public boolean hasCycle() {
-        packagesList = new LinkedList<>();
-        boolean b = false;
+        List<Package> packagesList = new LinkedList<>();
 
         for (Package aPackage : packages) {
-            if (hasCycle(aPackage)) {
-                b = true;
+            if (hasCycle(aPackage, packagesList)) {
+                return true;
             }
         }
-        packagesList = null;
-        return b;
-
+        return false;
     }
 
-    private boolean hasCycle(Package pack) {
+    private boolean hasCycle(Package pack, List<Package> packagesList) {
+
         if (packagesList.contains(pack)) {
             return true;
         }
-
         packagesList.add(pack);
+
         for (Package aPackage : pack.getDependencies()) {
-            if (hasCycle(aPackage)) {
+            if (hasCycle(aPackage, packagesList)) {
                 return true;
             }
         }
@@ -53,12 +49,11 @@ public class Project {
         return false;
     }
 
-
     private List<Package> getOrderList(Package aPackage) {
+
         if (hasCycle()) {
             throw new RuntimeException("Dependencies has cycle");
         }
-
         List<Package> result = new LinkedList<>();
 
         for (Package aPackage1 : aPackage.getDependencies()) {
@@ -75,8 +70,6 @@ public class Project {
             result.addAll(getOrderList(aPackage1));
 
         }
-
         return result.stream().distinct().collect(Collectors.toList());
     }
-
 }
